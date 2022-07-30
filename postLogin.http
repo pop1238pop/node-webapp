@@ -1,0 +1,7 @@
+POST https://tools.ecpe.nu.ac.th/network/api/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "email":"็Hattakorn.1238@gmail.com",
+    "password":"Hattakorn1238"
+}
