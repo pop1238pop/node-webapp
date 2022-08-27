@@ -5,10 +5,476 @@
 <head>
 <meta charset="utf-8">
 <title>First Page</title>
+
+<!--CSS-->
+<link rel="stylesheet" href="/jquery-ui/themes/base/jquery-ui.css">
+
+<!--Tailwind CSS-->
+<link rel="stylesheet" href="/styles/style.css"/>
+
+<!--Javascript-->
+<script src="/jquery/jquery.min.js"></script>
+<script src="/jquery-ui/jquery-ui.min.js"></script>
 </head>
 <body>
     <!--put here-->
     <h1>Hello, Hoola</h1>
     <!---->
+
+    <div id="tabs">
+        <ul>
+          <li><a href="#tabs-1">1-แบบฟอร์มลงทะเบียน</a></li>
+          <li><a href="#tabs-2">2-รายชื่อนิสิต(ALL)</a></li>
+          <li><a href="#tabs-3">3-ข้อมูลนิสิต</a></li>
+        </ul>
+        <div id="tabs-1">  
+
+            <form id="my-form">
+                <input type="text" id="txtStudentID" name="txtStudentID" placeholder="รหัสนิสิต" />
+                <br/>
+                <input type="text" id="txtName" name="txtName" placeholder="ชื่อ-นามสกุล" />
+                <br/>
+                <input type="text" id="txtuniversity" name="txtuniversity" placeholder="มหาวิทยาลัย" />
+                <br/>
+                <input type="text" id="colourfav" name="colourfav" placeholder="สีที่ชอบ" />
+                <br/>
+                <input type="text" id="txtEmail" name="txtEmail" placeholder="Email" />
+                <br/>
+                <input type="password" id="txtPassword" name="txtPassword" placeholder="รหัสผ่าน" />
+                <br/>
+                <input type="button" id="btnSubmit" value="Submit"/>
+            </form>
+        </div>
+        <div id="tabs-2">
+          <button class="ui-button ui-widget ui-corner-all" id="btnRequest">Load</button>
+          <div id="myDynamicTable"></div>
+        </div>
+        <div id="tabs-3">
+
+          <div class="flex justify-center">
+            <div class="rounded-lg shadow-lg bg-white max-w-sm">
+              <a href="#!">
+                <img class="rounded-t-lg" src="images/Priofile.png" alt=""/>
+              </a>
+              <div class="p-6">
+                <h5 class="text-gray-900 text-xl font-medium mb-2">Card title</h5>
+                <p class="text-gray-700 text-base mb-4">
+                  Some quick example text to build on the card title and make up the bulk of the card's
+                  content.
+                </p>
+                <button type="button" class=" inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out">Button</button>
+              </div>
+            </div>
+          </div>
+   
+        </div>
+    </div><!-- tabs-->
+    <script type="text/javascript">
+    $(document).ready(function () {
+       console.log("Onload");
+
+       $("#tabs").tabs({
+           activate: function(event, ui) {
+               var tabIndex = $("#tabs").tabs("option", "active");
+               //console.log(tabIndex);
+               if (tabIndex == 0) {
+                   console.log("tabs-1");
+               }else if(tabIndex == 1){
+                   console.log("tabs-2");
+               }else if(tabIndex == 2){
+                   console.log("tabs-3");
+               }
+           }
+       });
+
+       //btnRequest
+       $('#btnRequest').click( function(){
+         // url from where we want to get the data
+         $.ajax({
+           method: "GET",
+           url: "https://tools.ecpe.nu.ac.th/network/api/students",
+           dataType : 'json',
+           headers: { 
+             'Content-Type': 'application/json',
+             "Accepts": "application/json",
+             "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC90b29scy5lY3BlLm51LmFjLnRoXC9uZXR3b3JrXC9hcGlcL2xvZ2luIiwiaWF0IjoxNjU5MTkxNDk1LCJleHAiOjE2NTkxOTUwOTUsIm5iZiI6MTY1OTE5MTQ5NSwianRpIjoicjNiYm1mb3NFQmdoejA0YiIsInN1YiI6ODcsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.9TV_CNgs_WYpWTgl_Acgoj9CHoJx-bPiybFYnLAOJD0",
+           },
+           success: function(data){
+             console.log(data);
+             var tbName ="myDynamicTable";
+             addTable(data,tbName);
+
+             //alert("Done");
+           }
+         });
+       });
+       //btnSubmit
+       $('#btnSubmit').click( function(){
+          //console.log("Submit");
+          $.ajax({
+            method: "POST",
+            url: "https://tools.ecpe.nu.ac.th/network/api/register",
+            dataType : 'json',
+            headers: { 
+              'Content-Type': 'application/json',
+              "Accepts": "application/json",
+            },
+            data:JSON.stringify( { "name": $('#txtName').val(), "student_id": $('#txtStudentID').val(), "email": $('#txtEmail').val(), "password": $('#txtPassword').val() } ),
+            success: function(data){
+              console.log(data);
+             
+            }
+          });
+        });
+        
+    });
+</script>
+<script type="text/javascript">
+
+    var TableBackgroundMouseoverColor = "#b8663d";
+          function ChangeBackgroundColor(row) { row.style.backgroundColor = TableBackgroundMouseoverColor; }
+          function RestoreBackgroundColor(row,color_me) { row.style.backgroundColor = color_me; }
+  
+    function addTable(items,tb_name) {
+                    
+      console.log("addTable"+items.length);
+      var myTableDiv = document.getElementById(tb_name);
+  
+      var table = document.createElement('TABLE');
+      table.border = '1';
+      //table.setAttribute("class", "table table-striped");
+  
+      var tableHead = document.createElement('THEAD');
+      table.appendChild(tableHead);
+      
+      var trHead = document.createElement('TR');
+      trHead.setAttribute("style","background-color:#4e4cba;color: white;text-align: center;");
+      
+      tableHead.appendChild(trHead);
+      
+      var col1 = document.createElement('TD');
+      //col1.width = '25px';
+      col1.setAttribute("width","20px");
+      trHead.appendChild(col1);
+      col1.appendChild(document.createTextNode("No"));
+      
+      var col2 = document.createElement('TD');
+      trHead.appendChild(col2);
+      col2.appendChild(document.createTextNode("รหัสนิสิต"));
+      
+      var col3 = document.createElement('TD');
+      trHead.appendChild(col3);
+      col3.appendChild(document.createTextNode("ชื่อ-นามสกุล"));
+    
+      var col4 = document.createElement('TD');
+      trHead.appendChild(col4);
+      col4.appendChild(document.createTextNode("gpa"));
+    
+      var col5 = document.createElement('TD');
+      //col5.width = '50px';
+      trHead.appendChild(col5);
+      col5.appendChild(document.createTextNode("อาชีพในอนาคต"));
+  
+      var col6 = document.createElement('TD');
+      trHead.appendChild(col6);
+      col6.appendChild(document.createTextNode("รายละเอียด"));
+      
+      var tableBody = document.createElement('TBODY');
+      table.appendChild(tableBody);
+  
+      for (var i = 0; i < items.length; i++) {
+      var tr = document.createElement('TR');
+      //$(tr);
+      tableBody.appendChild(tr);
+        
+      var color;
+      if(i%2==0){
+        color="#F1E2E2"; // result%2 != 0
+      }else{
+         color="#DDD3B3";
+      }
+      idItem=(i+1);
+      //--------cell 1
+      tr.id=idItem;
+        
+      tr.setAttribute("onmouseover","ChangeBackgroundColor(this)");
+      tr.setAttribute("onmouseout","RestoreBackgroundColor(this,'"+color+"')");
+      tr.setAttribute("style","background-color:"+color+";");
+  
+      for (var j = 0; j < 6; j++) {
+        
+        //td.width = '75';
+        if(j==0){
+          var cell1 = document.createElement('TD');
+          //td.width = '25px';
+          //$(td).attr('id',i++);
+          //td.setAttribute("width", "25px");
+          cell1.setAttribute("width","20px");
+          cell1.setAttribute("align","center");
+          cell1.appendChild(document.createTextNode("" + (i+1) ));
+          tr.appendChild(cell1);
+        }else if(j==1){
+          //status
+          var cell2 = document.createElement('TD');
+          cell2.appendChild(document.createTextNode(items[i].student_id));
+          tr.appendChild(cell2);
+          //tr.appendChild(td);
+          
+        }else if(j==2){
+          //number_bill
+          var cell3 = document.createElement('TD');
+          cell3.appendChild(document.createTextNode(items[i].fullname));
+          tr.appendChild(cell3);
+          //tr.appendChild(td);
+        }else if(j==3){
+          //work_Code
+          var cell4 = document.createElement('TD');
+          cell4.appendChild(document.createTextNode(items[i].gpa));
+          tr.appendChild(cell4);
+          //tr.appendChild(td);
+        }else if(j==4){
+          //date
+          var cell5 = document.createElement('TD');
+          cell5.appendChild(document.createTextNode(items[i].position));
+          tr.appendChild(cell5);
+          //tr.appendChild(td);
+        }else if(j==5){
+          //department
+          //btn
+          var cell5 = document.createElement('TD');
+          //cell8.appendChild(document.createTextNode("tt"));
+          cell5.setAttribute("align","center");
+          cell5.setAttribute("width","20px");
+          
+          var elementButtonSave = document.createElement("input");
+          elementButtonSave.type = "button";
+          elementButtonSave.id = "btnConfirm"+idItem;
+          elementButtonSave.value = "รายละเอียด";
+        //elementStartDate.setAttribute("width","80");
+         // elementButtonSave.setAttribute("style","width:50px;");
+          //elementButtonSave.setAttribute("class","tealA400");
+          
+         
+          elementButtonSave.setAttribute("onclick","popupConfirm('"+items[i].fullname+"',this)");
+          
+  
+          cell5.appendChild(elementButtonSave);
+          
+          
+          tr.appendChild(cell5);
+          //tr.appendChild(td);
+        }
+      }
+      }
+      myTableDiv.appendChild(table);
+    }
+  
+    function popupConfirm(fullname,objElement){
+      alert(fullname);
+    }
+  </script><script type="text/javascript">
+    $(document).ready(function () {
+       console.log("Onload");
+
+       $("#tabs").tabs({
+           activate: function(event, ui) {
+               var tabIndex = $("#tabs").tabs("option", "active");
+               //console.log(tabIndex);
+               if (tabIndex == 0) {
+                   console.log("tabs-1");
+               }else if(tabIndex == 1){
+                   console.log("tabs-2");
+               }else if(tabIndex == 2){
+                   console.log("tabs-3");
+               }
+           }
+       });
+
+       //btnRequest
+       $('#btnRequest').click( function(){
+         // url from where we want to get the data
+         $.ajax({
+           method: "GET",
+           url: "https://tools.ecpe.nu.ac.th/network/api/students",
+           dataType : 'json',
+           headers: { 
+             'Content-Type': 'application/json',
+             "Accepts": "application/json",
+             "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC90b29scy5lY3BlLm51LmFjLnRoXC9uZXR3b3JrXC9hcGlcL2xvZ2luIiwiaWF0IjoxNjU5MTkxNDk1LCJleHAiOjE2NTkxOTUwOTUsIm5iZiI6MTY1OTE5MTQ5NSwianRpIjoicjNiYm1mb3NFQmdoejA0YiIsInN1YiI6ODcsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.9TV_CNgs_WYpWTgl_Acgoj9CHoJx-bPiybFYnLAOJD0",
+           },
+           success: function(data){
+             console.log(data);
+             var tbName ="myDynamicTable";
+             addTable(data,tbName);
+
+             //alert("Done");
+           }
+         });
+       });
+       //btnSubmit
+       $('#btnSubmit').click( function(){
+          //console.log("Submit");
+          $.ajax({
+            method: "POST",
+            url: "https://tools.ecpe.nu.ac.th/network/api/register",
+            dataType : 'json',
+            headers: { 
+              'Content-Type': 'application/json',
+              "Accepts": "application/json",
+            },
+            data:JSON.stringify( { "name": $('#txtName').val(), "student_id": $('#txtStudentID').val(), "email": $('#txtEmail').val(), "password": $('#txtPassword').val() } ),
+            success: function(data){
+              console.log(data);
+             
+            }
+          });
+        });
+        
+    });
+</script>
+<script type="text/javascript">
+
+    var TableBackgroundMouseoverColor = "#b8663d";
+          function ChangeBackgroundColor(row) { row.style.backgroundColor = TableBackgroundMouseoverColor; }
+          function RestoreBackgroundColor(row,color_me) { row.style.backgroundColor = color_me; }
+  
+    function addTable(items,tb_name) {
+                    
+      console.log("addTable"+items.length);
+      var myTableDiv = document.getElementById(tb_name);
+  
+      var table = document.createElement('TABLE');
+      table.border = '1';
+      //table.setAttribute("class", "table table-striped");
+  
+      var tableHead = document.createElement('THEAD');
+      table.appendChild(tableHead);
+      
+      var trHead = document.createElement('TR');
+      trHead.setAttribute("style","background-color:#4e4cba;color: white;text-align: center;");
+      
+      tableHead.appendChild(trHead);
+      
+      var col1 = document.createElement('TD');
+      //col1.width = '25px';
+      col1.setAttribute("width","20px");
+      trHead.appendChild(col1);
+      col1.appendChild(document.createTextNode("No"));
+      
+      var col2 = document.createElement('TD');
+      trHead.appendChild(col2);
+      col2.appendChild(document.createTextNode("รหัสนิสิต"));
+      
+      var col3 = document.createElement('TD');
+      trHead.appendChild(col3);
+      col3.appendChild(document.createTextNode("ชื่อ-นามสกุล"));
+    
+      var col4 = document.createElement('TD');
+      trHead.appendChild(col4);
+      col4.appendChild(document.createTextNode("gpa"));
+    
+      var col5 = document.createElement('TD');
+      //col5.width = '50px';
+      trHead.appendChild(col5);
+      col5.appendChild(document.createTextNode("อาชีพในอนาคต"));
+  
+      var col6 = document.createElement('TD');
+      trHead.appendChild(col6);
+      col6.appendChild(document.createTextNode("รายละเอียด"));
+      
+      var tableBody = document.createElement('TBODY');
+      table.appendChild(tableBody);
+  
+      for (var i = 0; i < items.length; i++) {
+      var tr = document.createElement('TR');
+      //$(tr);
+      tableBody.appendChild(tr);
+        
+      var color;
+      if(i%2==0){
+        color="#F1E2E2"; // result%2 != 0
+      }else{
+         color="#DDD3B3";
+      }
+      idItem=(i+1);
+      //--------cell 1
+      tr.id=idItem;
+        
+      tr.setAttribute("onmouseover","ChangeBackgroundColor(this)");
+      tr.setAttribute("onmouseout","RestoreBackgroundColor(this,'"+color+"')");
+      tr.setAttribute("style","background-color:"+color+";");
+  
+      for (var j = 0; j < 6; j++) {
+        
+        //td.width = '75';
+        if(j==0){
+          var cell1 = document.createElement('TD');
+          //td.width = '25px';
+          //$(td).attr('id',i++);
+          //td.setAttribute("width", "25px");
+          cell1.setAttribute("width","20px");
+          cell1.setAttribute("align","center");
+          cell1.appendChild(document.createTextNode("" + (i+1) ));
+          tr.appendChild(cell1);
+        }else if(j==1){
+          //status
+          var cell2 = document.createElement('TD');
+          cell2.appendChild(document.createTextNode(items[i].student_id));
+          tr.appendChild(cell2);
+          //tr.appendChild(td);
+          
+        }else if(j==2){
+          //number_bill
+          var cell3 = document.createElement('TD');
+          cell3.appendChild(document.createTextNode(items[i].fullname));
+          tr.appendChild(cell3);
+          //tr.appendChild(td);
+        }else if(j==3){
+          //work_Code
+          var cell4 = document.createElement('TD');
+          cell4.appendChild(document.createTextNode(items[i].gpa));
+          tr.appendChild(cell4);
+          //tr.appendChild(td);
+        }else if(j==4){
+          //date
+          var cell5 = document.createElement('TD');
+          cell5.appendChild(document.createTextNode(items[i].position));
+          tr.appendChild(cell5);
+          //tr.appendChild(td);
+        }else if(j==5){
+          //department
+          //btn
+          var cell5 = document.createElement('TD');
+          //cell8.appendChild(document.createTextNode("tt"));
+          cell5.setAttribute("align","center");
+          cell5.setAttribute("width","20px");
+          
+          var elementButtonSave = document.createElement("input");
+          elementButtonSave.type = "button";
+          elementButtonSave.id = "btnConfirm"+idItem;
+          elementButtonSave.value = "รายละเอียด";
+        //elementStartDate.setAttribute("width","80");
+         // elementButtonSave.setAttribute("style","width:50px;");
+          //elementButtonSave.setAttribute("class","tealA400");
+          
+         
+          elementButtonSave.setAttribute("onclick","popupConfirm('"+items[i].fullname+"',this)");
+          
+  
+          cell5.appendChild(elementButtonSave);
+          
+          
+          tr.appendChild(cell5);
+          //tr.appendChild(td);
+        }
+      }
+      }
+      myTableDiv.appendChild(table);
+    }
+  
+    function popupConfirm(fullname,objElement){
+      alert(fullname);
+    }
+  </script>
 </body>
 </html>
